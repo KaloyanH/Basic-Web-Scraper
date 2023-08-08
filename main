@@ -1,0 +1,43 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
+from bs4 import BeautifulSoup
+
+target_url = "https://www.pazaruvaj.com/"
+search_term = input() # discord message when implemented
+
+driver = webdriver.Edge()
+driver.get(target_url)
+
+
+search_input = driver.find_element(By.CSS_SELECTOR, ".c-search__input")
+search_input.send_keys(search_term)
+search_input.send_keys(Keys.RETURN)
+
+wait = WebDriverWait(driver, 10)
+sorting_button = wait.until(ec.presence_of_element_located((By.CSS_SELECTOR, "#order-dropdown")))
+sorting_button.send_keys(Keys.RETURN)
+
+
+sort_by_cheapest = wait.until(ec.visibility_of_element_located((By.CSS_SELECTOR,  "#product-list > "
+                                                                                  "div.category-navbar.clearfix > "
+                                                                                  "span > ul > li:nth-child(3) > a")))
+sort_by_cheapest.send_keys(Keys.RETURN)
+
+
+page_source = driver.page_source
+
+driver.quit()
+
+soup = BeautifulSoup(page_source, features="html.parser")
+
+product_name_elements = soup.select("#normal-product-list > div.list-view > div > "
+                                    "div.product-box-container.clearfix > "
+                                    "div.col-lg-6.col-md-6.col-sm-6.col-xs-8.top-center > "
+                                    "div.name.ulined-link > h2 > a")
+
+for index, element in enumerate(product_name_elements, start=1):
+    product_name = element.text.strip()
+    print(f"Product Name:", product_name)
